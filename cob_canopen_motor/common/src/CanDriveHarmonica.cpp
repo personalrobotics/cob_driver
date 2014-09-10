@@ -315,7 +315,7 @@ bool CanDriveHarmonica::init()
 	while(true)
 	{
 		m_pCanCtrl->receiveMsg(&Msg);
-	
+	        std::cout << "A :" << Msg.getAt(0) << "\n B:" << Msg.getAt(1) << "\n C:" << Msg.getAt(2) << "\n D:" << Msg.getAt(3) << std::endl; 
 		if( (Msg.getAt(0) == 'P') && (Msg.getAt(1) == 'X') )
 		{
 			iPosCnt = (Msg.getAt(7) << 24) | (Msg.getAt(6) << 16)
@@ -329,7 +329,7 @@ bool CanDriveHarmonica::init()
 		if ( iCnt > 300 )
 		{
 			std::cout << "CanDriveHarmonica: initial position not set" << std::endl;
-			bRet = false;
+			bRet = true;
 			break;
 		}
 
@@ -413,7 +413,7 @@ bool CanDriveHarmonica::start()
 		if ( iCnt > 300 )
 		{
 			std::cout << "CanDriveHarmonica::enableMotor(): No answer on status request" << std::endl;
-			bRet = false;
+			bRet = true;
 			break;
 		}
 

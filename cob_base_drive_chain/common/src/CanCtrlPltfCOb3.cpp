@@ -1046,15 +1046,6 @@ bool CanCtrlPltfCOb3::initPltf()
 		}
 		if(bHomingOk)
 		{
-			// Calc Compensation factor for Velocity:
-			if(m_iNumDrives >= 1)
-				vdFactorVel[0] = - m_Param.dWheel1SteerDriveCoupling + double(m_Param.iDistSteerAxisToDriveWheelMM) / double(m_Param.iRadiusWheelMM);
-			if(m_iNumDrives >= 2)
-				vdFactorVel[1] = - m_Param.dWheel2SteerDriveCoupling + double(m_Param.iDistSteerAxisToDriveWheelMM) / double(m_Param.iRadiusWheelMM);
-			if(m_iNumDrives >= 3)
-				vdFactorVel[2] = - m_Param.dWheel3SteerDriveCoupling + double(m_Param.iDistSteerAxisToDriveWheelMM) / double(m_Param.iRadiusWheelMM);
-			if(m_iNumDrives == 4)
-				vdFactorVel[3] = - m_Param.dWheel4SteerDriveCoupling + double(m_Param.iDistSteerAxisToDriveWheelMM) / double(m_Param.iRadiusWheelMM);
 
 			// initialize homing procedure
 			for (int i = 0; i<m_iNumDrives; i++)
@@ -1064,7 +1055,7 @@ bool CanCtrlPltfCOb3::initPltf()
 			for (int i = 0; i<m_iNumDrives; i++)
 			{
 				vpSteerMotor[i]->setGearVelRadS(dhomeVeloRadS);
-				vpDriveMotor[i]->setGearVelRadS(dhomeVeloRadS * vdFactorVel[i]);
+				vpDriveMotor[i]->setGearVelRadS(0); //JNN  dhomeVeloRadS
 			}
 
 			// wait at least 0.5 sec.
