@@ -510,7 +510,7 @@ int main(int argc, char** argv)
 
   // construct nodeClass
   NodeClass nodeClass;
-
+  ROS_INFO("Try to initialite Undercarriage control");
   // automatically do initializing of controller, because it's not directly depending any hardware components
   nodeClass.ucar_ctrl_->InitUndercarriageCtrl();
   nodeClass.is_initialized_bool_ = true;
@@ -692,7 +692,7 @@ void NodeClass::UpdateOdometry()
     geometry_msgs::TransformStamped odom_tf;
     // compose header
     odom_tf.header.stamp = joint_state_odom_stamp_;
-    odom_tf.header.frame_id = "/odom_combined";
+    odom_tf.header.frame_id = "/odom";
     odom_tf.child_frame_id = "/base_link";
     // compose data container
     odom_tf.transform.translation.x = x_rob_m_;
@@ -708,7 +708,7 @@ void NodeClass::UpdateOdometry()
   nav_msgs::Odometry odom_top;
   // compose header
   odom_top.header.stamp = joint_state_odom_stamp_;
-  odom_top.header.frame_id = "/wheelodom";
+  odom_top.header.frame_id = "/odom";
   odom_top.child_frame_id = "/base_link";
   // compose pose of robot
   odom_top.pose.pose.position.x = x_rob_m_;

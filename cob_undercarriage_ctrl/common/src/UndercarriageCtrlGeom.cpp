@@ -146,6 +146,7 @@ UndercarriageCtrlGeom::~UndercarriageCtrlGeom(void)
 void UndercarriageCtrlGeom::InitUndercarriageCtrl(void)
 {
 	//Geom Parameter
+	ROS_INFO("Loading Parameter for UndercarriageCtrlGoem");
 	if (n.hasParam("Geom/DistWheels"))
       	{
         	n.getParam("Geom/DistWheels", m_UnderCarriagePrms.iDistWheels);
@@ -164,7 +165,7 @@ void UndercarriageCtrlGeom::InitUndercarriageCtrl(void)
       	}
 	if (n.hasParam("Geom/Wheel1YPos"))
       	{
-        	n.getParam("Geom/Wheel1YPos", m_vdWheelXPosMM[0]);
+        	n.getParam("Geom/Wheel1YPos", m_vdWheelYPosMM[0]);
       	}
 	if (n.hasParam("Geom/Wheel2XPos"))
       	{
@@ -172,7 +173,7 @@ void UndercarriageCtrlGeom::InitUndercarriageCtrl(void)
       	}
 	if (n.hasParam("Geom/Wheel2YPos"))
       	{
-        	n.getParam("Geom/Wheel2YPos", m_vdWheelXPosMM[1]);
+        	n.getParam("Geom/Wheel2YPos", m_vdWheelYPosMM[1]);
       	}
 	if (n.hasParam("Geom/Wheel3XPos"))
       	{
@@ -180,7 +181,7 @@ void UndercarriageCtrlGeom::InitUndercarriageCtrl(void)
       	}
 	if (n.hasParam("Geom/Wheel3YPos"))
       	{
-        	n.getParam("Geom/Wheel3YPos", m_vdWheelXPosMM[2]);
+        	n.getParam("Geom/Wheel3YPos", m_vdWheelYPosMM[2]);
       	}
 	if (n.hasParam("Geom/Wheel4XPos"))
       	{
@@ -188,7 +189,7 @@ void UndercarriageCtrlGeom::InitUndercarriageCtrl(void)
       	}
 	if (n.hasParam("Geom/Wheel4YPos"))
       	{
-        	n.getParam("Geom/Wheel4YPos", m_vdWheelXPosMM[3]);
+        	n.getParam("Geom/Wheel4YPos", m_vdWheelYPosMM[3]);
       	}
 	//DrivePrms
 	if (n.hasParam("DrivePrms/MaxDriveRate"))
