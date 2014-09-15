@@ -54,16 +54,22 @@
 #include <cob_undercarriage_ctrl/UndercarriageCtrlGeom.h>
 
 // Constructor
-UndercarriageCtrlGeom::UndercarriageCtrlGeom(std::string sIniDirectory)
+UndercarriageCtrlGeom::UndercarriageCtrlGeom()
 {
-	m_sIniDirectory = sIniDirectory;
 	
 	// init EMStop flag
 	m_bEMStopActive = false;
 	
-	IniFile iniFile;
-	iniFile.SetFileName(m_sIniDirectory + "Platform.ini", "UnderCarriageCtrlGeom.cpp");
-	iniFile.GetKeyInt("Config", "NumberOfWheels", &m_iNumberOfDrives, true);
+	if (n.hasParam("NumberOfWheels"))
+      	{
+        	n.getParam("NumberOfWheels", m_iNumberOfDrives);
+        	ROS_INFO("NumberOfWheels loaded from Parameter-Server is: %i", m_iNumberOfDrives);
+      	}
+      	else
+      	{
+        	ROS_WARN("No parameter NumberOfWheels on Parameter-Server. Using default: 4");
+        	m_iNumberOfDrives = 4;
+      	}
 
 	// init vectors
 	m_vdVelGearDriveRadS.assign(4,0);
@@ -107,9 +113,7 @@ UndercarriageCtrlGeom::UndercarriageCtrlGeom(std::string sIniDirectory)
 	
 	m_vdCtrlVal.assign( 4, std::vector<double> (2,0.0) );
 	
-	//m_vdDeltaAngIntpRad.assign(4,0);
-	//m_vdDeltaDriveIntpRadS.assign(4,0);
-
+	
 	// init Prms of Impedance-Ctrlr
 	m_dSpring = 10.0;
 	m_dDamp = 2.5;
@@ -117,21 +121,7 @@ UndercarriageCtrlGeom::UndercarriageCtrlGeom(std::string sIniDirectory)
 	m_dDPhiMax = 12.0;
 	m_dDDPhiMax = 100.0;
 
-	/*// Logging for debugging
-	// Init timestamp for startup of the robot
-	m_StartTime.SetNow();
-	// open Files for PltfVel
-	m_pfileDesVel = fopen("LogCtrl/DesPltfVel.txt","w");
-	m_pfileMeasVel = fopen("LogCtrl/MeasPltfVel.txt","w");
-	// open Files for corresponding Joint-Configuration
-	m_pfileSteerAngTarget1 = fopen("LogCtrl/SteerAngTarget1.txt","w");
-	m_pfileSteerAngTarget2 = fopen("LogCtrl/SteerAngTarget2.txt","w");
-	m_pfileSteerAngTarget = fopen("LogCtrl/SteerAngTarget.txt","w");
-	m_pfileDriveVelTarget = fopen("LogCtrl/DriveVelTarget.txt","w");
-	// open Files for resulting Joint-Commands
-	m_pfileSteerAngCmd = fopen("LogCtrl/SteerAngCmd.txt","w");
-	m_pfileSteerVelCmd = fopen("LogCtrl/SteerVelCmd.txt","w");
-	m_pfileDriveVelCmd = fopen("LogCtrl/DriveVelCmd.txt","w");*/
+
 
 }
 
@@ -155,37 +145,118 @@ UndercarriageCtrlGeom::~UndercarriageCtrlGeom(void)
 // Initialize Parameters for Controller and Kinematics
 void UndercarriageCtrlGeom::InitUndercarriageCtrl(void)
 {
-	//LOG_OUT("Initializing Undercarriage-Controller (Geom)");
-
-	IniFile iniFile;
-
-	iniFile.SetFileName(m_sIniDirectory + "Platform.ini", "UnderCarriageCtrlGeom.cpp");
-	iniFile.GetKeyInt("Geom", "DistWheels", &m_UnderCarriagePrms.iDistWheels, true);
-	iniFile.GetKeyInt("Geom", "RadiusWheel", &m_UnderCarriagePrms.iRadiusWheelMM, true);
-	iniFile.GetKeyInt("Geom", "DistSteerAxisToDriveWheelCenter", &m_UnderCarriagePrms.iDistSteerAxisToDriveWheelMM, true);
-
-	iniFile.GetKeyDouble("Geom", "Wheel1XPos", &m_vdWheelXPosMM[0], true);
-	iniFile.GetKeyDouble("Geom", "Wheel1YPos", &m_vdWheelYPosMM[0], true);
-	iniFile.GetKeyDouble("Geom", "Wheel2XPos", &m_vdWheelXPosMM[1], true);
-	iniFile.GetKeyDouble("Geom", "Wheel2YPos", &m_vdWheelYPosMM[1], true);
-	iniFile.GetKeyDouble("Geom", "Wheel3XPos", &m_vdWheelXPosMM[2], true);
-	iniFile.GetKeyDouble("Geom", "Wheel3YPos", &m_vdWheelYPosMM[2], true);
-	iniFile.GetKeyDouble("Geom", "Wheel4XPos", &m_vdWheelXPosMM[3], true);
-	iniFile.GetKeyDouble("Geom", "Wheel4YPos", &m_vdWheelYPosMM[3], true);
-
-	iniFile.GetKeyDouble("DrivePrms", "MaxDriveRate", &m_UnderCarriagePrms.dMaxDriveRateRadpS, true);
-	iniFile.GetKeyDouble("DrivePrms", "MaxSteerRate", &m_UnderCarriagePrms.dMaxSteerRateRadpS, true);
-
-	iniFile.GetKeyDouble("DrivePrms", "Wheel1SteerDriveCoupling", &m_UnderCarriagePrms.vdSteerDriveCoupling[0], true);
-	iniFile.GetKeyDouble("DrivePrms", "Wheel2SteerDriveCoupling", &m_UnderCarriagePrms.vdSteerDriveCoupling[1], true);
-	iniFile.GetKeyDouble("DrivePrms", "Wheel3SteerDriveCoupling", &m_UnderCarriagePrms.vdSteerDriveCoupling[2], true);
-	iniFile.GetKeyDouble("DrivePrms", "Wheel4SteerDriveCoupling", &m_UnderCarriagePrms.vdSteerDriveCoupling[3], true);
-
-	iniFile.GetKeyDouble("DrivePrms", "Wheel1NeutralPosition", &m_UnderCarriagePrms.WheelNeutralPos[0], true);
-	iniFile.GetKeyDouble("DrivePrms", "Wheel2NeutralPosition", &m_UnderCarriagePrms.WheelNeutralPos[1], true);
-	iniFile.GetKeyDouble("DrivePrms", "Wheel3NeutralPosition", &m_UnderCarriagePrms.WheelNeutralPos[2], true);
-	iniFile.GetKeyDouble("DrivePrms", "Wheel4NeutralPosition", &m_UnderCarriagePrms.WheelNeutralPos[3], true);
-	
+	//Geom Parameter
+	if (n.hasParam("Geom/DistWheels"))
+      	{
+        	n.getParam("Geom/DistWheels", m_UnderCarriagePrms.iDistWheels);
+      	}
+	if (n.hasParam("Geom/RadiusWheel"))
+      	{
+        	n.getParam("Geom/RadiusWheel", m_UnderCarriagePrms.iRadiusWheelMM);
+      	}
+	if (n.hasParam("Geom/DistSteerAxisToDriveWheelCenter"))
+      	{
+        	n.getParam("Geom/DistSteerAxisToDriveWheelCenter", m_UnderCarriagePrms.iDistSteerAxisToDriveWheelMM);
+      	}
+	if (n.hasParam("Geom/Wheel1XPos"))
+      	{
+        	n.getParam("Geom/Wheel1XPos", m_vdWheelXPosMM[0]);
+      	}
+	if (n.hasParam("Geom/Wheel1YPos"))
+      	{
+        	n.getParam("Geom/Wheel1YPos", m_vdWheelXPosMM[0]);
+      	}
+	if (n.hasParam("Geom/Wheel2XPos"))
+      	{
+        	n.getParam("Geom/Wheel2XPos", m_vdWheelXPosMM[1]);
+      	}
+	if (n.hasParam("Geom/Wheel2YPos"))
+      	{
+        	n.getParam("Geom/Wheel2YPos", m_vdWheelXPosMM[1]);
+      	}
+	if (n.hasParam("Geom/Wheel3XPos"))
+      	{
+        	n.getParam("Geom/Wheel3XPos", m_vdWheelXPosMM[2]);
+      	}
+	if (n.hasParam("Geom/Wheel3YPos"))
+      	{
+        	n.getParam("Geom/Wheel3YPos", m_vdWheelXPosMM[2]);
+      	}
+	if (n.hasParam("Geom/Wheel4XPos"))
+      	{
+        	n.getParam("Geom/Wheel4XPos", m_vdWheelXPosMM[3]);
+      	}
+	if (n.hasParam("Geom/Wheel4YPos"))
+      	{
+        	n.getParam("Geom/Wheel4YPos", m_vdWheelXPosMM[3]);
+      	}
+	//DrivePrms
+	if (n.hasParam("DrivePrms/MaxDriveRate"))
+      	{
+        	n.getParam("DrivePrms/MaxDriveRate", m_UnderCarriagePrms.dMaxDriveRateRadpS);
+      	}
+	if (n.hasParam("DrivePrms/MaxSteerRate"))
+      	{
+        	n.getParam("DrivePrms/MaxSteerRate", m_UnderCarriagePrms.dMaxSteerRateRadpS);
+      	}
+	if (n.hasParam("DrivePrms/Wheel1SteerDriveCoupling"))
+      	{
+        	n.getParam("DrivePrms/Wheel1SteerDriveCoupling", m_UnderCarriagePrms.vdSteerDriveCoupling[0]);
+      	}
+	if (n.hasParam("DrivePrms/Wheel2SteerDriveCoupling"))
+      	{
+        	n.getParam("DrivePrms/Wheel2SteerDriveCoupling", m_UnderCarriagePrms.vdSteerDriveCoupling[1]);
+      	}
+	if (n.hasParam("DrivePrms/Wheel3SteerDriveCoupling"))
+      	{
+        	n.getParam("DrivePrms/Wheel3SteerDriveCoupling", m_UnderCarriagePrms.vdSteerDriveCoupling[2]);
+      	}
+	if (n.hasParam("DrivePrms/Wheel4SteerDriveCoupling"))
+      	{
+        	n.getParam("DrivePrms/Wheel4SteerDriveCoupling", m_UnderCarriagePrms.vdSteerDriveCoupling[3]);
+      	}
+	if (n.hasParam("DrivePrms/Wheel1NeutralPosition"))
+      	{
+        	n.getParam("DrivePrms/Wheel1NeutralPosition", m_UnderCarriagePrms.WheelNeutralPos[0]);
+      	}
+	if (n.hasParam("DrivePrms/Wheel2NeutralPosition"))
+      	{
+        	n.getParam("DrivePrms/Wheel2NeutralPosition", m_UnderCarriagePrms.WheelNeutralPos[1]);
+      	}
+	if (n.hasParam("DrivePrms/Wheel3NeutralPosition"))
+      	{
+        	n.getParam("DrivePrms/Wheel3NeutralPosition", m_UnderCarriagePrms.WheelNeutralPos[2]);
+      	}
+	if (n.hasParam("DrivePrms/Wheel4NeutralPosition"))
+      	{
+        	n.getParam("DrivePrms/Wheel4NeutralPosition", m_UnderCarriagePrms.WheelNeutralPos[3]);
+      	}
+	//Thread
+	if (n.hasParam("Thread/ThrUCarrCycleTimeS"))
+      	{
+        	n.getParam("Thread/ThrUCarrCycleTimeS", m_UnderCarriagePrms.dCmdRateS);
+      	}
+	//Motion Control
+	if (n.hasParam("SteerCtrl/Spring"))
+      	{
+        	n.getParam("SteerCtrl/Spring", m_dSpring);
+      	}
+	if (n.hasParam("SteerCtrl/Damp"))
+      	{
+        	n.getParam("SteerCtrl/Damp", m_dDamp);
+      	}
+	if (n.hasParam("SteerCtrl/VirtMass"))
+      	{
+        	n.getParam("SteerCtrl/VirtMass", m_dVirtM);
+      	}
+	if (n.hasParam("SteerCtrl/DPhiMax"))
+      	{
+        	n.getParam("SteerCtrl/DPhiMax", m_dDPhiMax);
+      	}
+	if (n.hasParam("SteerCtrl/DDPhiMax"))
+      	{
+        	n.getParam("SteerCtrl/DDPhiMax", m_dDDPhiMax);
+      	}
 	for(int i = 0; i<4; i++)
 	{	
 		m_UnderCarriagePrms.WheelNeutralPos[i] = MathSup::convDegToRad(m_UnderCarriagePrms.WheelNeutralPos[i]);
@@ -197,16 +268,6 @@ void UndercarriageCtrlGeom::InitUndercarriageCtrl(void)
 		m_vdAngGearSteerTargetRad[i] = m_UnderCarriagePrms.WheelNeutralPos[i];
 	}
 	
-	iniFile.GetKeyDouble("Thread", "ThrUCarrCycleTimeS", &m_UnderCarriagePrms.dCmdRateS, true);
-
-	// Read Values for Steering Position Controller from IniFile
-	iniFile.SetFileName(m_sIniDirectory + "MotionCtrl.ini", "PltfHardwareCoB3.h");
-	// Prms of Impedance-Ctrlr
-	iniFile.GetKeyDouble("SteerCtrl", "Spring", &m_dSpring, true);
-	iniFile.GetKeyDouble("SteerCtrl", "Damp", &m_dDamp, true);
-	iniFile.GetKeyDouble("SteerCtrl", "VirtMass", &m_dVirtM, true);
-	iniFile.GetKeyDouble("SteerCtrl", "DPhiMax", &m_dDPhiMax, true);
-	iniFile.GetKeyDouble("SteerCtrl", "DDPhiMax", &m_dDDPhiMax, true);
 
 	// calculate polar coords of Wheel Axis in robot coordinate frame
 	for(int i=0; i<4; i++)

@@ -73,7 +73,6 @@
 
 // external includes
 #include <cob_undercarriage_ctrl/UndercarriageCtrlGeom.h>
-#include <cob_utilities/IniFile.h>
 //#include <cob_utilities/MathSup.h>
 
 //####################
@@ -108,7 +107,6 @@ class NodeClass
 
     // member variables
     UndercarriageCtrlGeom * ucar_ctrl_;	// instantiate undercarriage controller
-    std::string sIniDirectory;
     bool is_initialized_bool_;			// flag wether node is already up and running
     bool broadcast_tf_;			// flag wether to broadcast the tf from odom to base_link
     int drive_chain_diagnostic_;		// flag whether base drive chain is operating normal 
@@ -159,19 +157,6 @@ class NodeClass
         ROS_WARN("Specified timeout < sample_time. Setting timeout to sample_time = %fs", sample_time_);
         timeout_ = sample_time_;
       }
-
-      // Read number of drives from iniFile and pass IniDirectory to CobPlatfCtrl.
-      if (n.hasParam("IniDirectory"))
-      {
-        n.getParam("IniDirectory", sIniDirectory);
-        ROS_INFO("IniDirectory loaded from Parameter-Server is: %s", sIniDirectory.c_str());
-      }
-      else
-      {
-        sIniDirectory = "Platform/IniFiles/";
-        ROS_WARN("IniDirectory not found on Parameter-Server, using default value: %s", sIniDirectory.c_str());
-      }
-
       if (n.hasParam("max_trans_velocity"))
       {
         n.getParam("max_trans_velocity", max_vel_trans_);
@@ -196,12 +181,22 @@ class NodeClass
       {
         n.getParam("broadcast_tf", broadcast_tf_);
       }
-
-      IniFile iniFile;
-      iniFile.SetFileName(sIniDirectory + "Platform.ini", "PltfHardwareCoB3.h");
-      iniFile.GetKeyInt("Config", "NumberOfMotors", &m_iNumJoints, true);
-
-      ucar_ctrl_ = new UndercarriageCtrlGeom(sIniDirectory);
+      else
+      {
+        ROS_WARN("No parameter broadcast_tf on Parameter-Server. Using default: true");
+        broadcast_tf_ = true;
+      }
+      if (n.hasParam("NumberOfMotors"))
+      {
+        n.getParam("NumberOfMotors", m_iNumJoints);
+        ROS_INFO("NumberOfMotors loaded from Parameter-Server is: %i", m_iNumJoints);
+      }
+      else
+      {
+        ROS_WARN("No parameter NumberOfMotors on Parameter-Server. Using default: 8");
+        m_iNumJoints = 8;
+      }
+      ucar_ctrl_ = new UndercarriageCtrlGeom();
 
 
       // implementation of topics
@@ -698,7 +693,7 @@ void NodeClass::UpdateOdometry()
     // compose header
     odom_tf.header.stamp = joint_state_odom_stamp_;
     odom_tf.header.frame_id = "/odom_combined";
-    odom_tf.child_frame_id = "/base_footprint";
+    odom_tf.child_frame_id = "/base_link";
     // compose data container
     odom_tf.transform.translation.x = x_rob_m_;
     odom_tf.transform.translation.y = y_rob_m_;
@@ -714,7 +709,7 @@ void NodeClass::UpdateOdometry()
   // compose header
   odom_top.header.stamp = joint_state_odom_stamp_;
   odom_top.header.frame_id = "/wheelodom";
-  odom_top.child_frame_id = "/base_footprint";
+  odom_top.child_frame_id = "/base_link";
   // compose pose of robot
   odom_top.pose.pose.position.x = x_rob_m_;
   odom_top.pose.pose.position.y = y_rob_m_;

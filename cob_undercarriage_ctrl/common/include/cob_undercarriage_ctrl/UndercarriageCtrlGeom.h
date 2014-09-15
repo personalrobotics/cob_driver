@@ -55,8 +55,9 @@
 #define UndercarriageCtrlGeom_INCLUDEDEF_H
 
 //#include <time.h>
+// ROS includes
+#include <ros/ros.h>
 
-#include <cob_utilities/IniFile.h>
 #include <cob_utilities/MathSup.h>
 #include <cob_utilities/TimeStamp.h>
 
@@ -68,8 +69,10 @@ private:
 	
 	int m_iNumberOfDrives;
 	
-	std::string m_sIniDirectory;
-	
+	// create a handle for this node, initialize node
+    	ros::NodeHandle n;
+
+
 	/*// Logging for debugging
 	// create Filepointers
 	FILE * m_pfileDesVel, * m_pfileMeasVel;
@@ -200,7 +203,7 @@ private:
 public:
 
 	// Constructor
-	UndercarriageCtrlGeom(std::string sIniDirectory);
+	UndercarriageCtrlGeom();
 
 	// Destructor
 	~UndercarriageCtrlGeom(void);
