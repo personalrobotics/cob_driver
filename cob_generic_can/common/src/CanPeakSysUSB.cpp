@@ -62,14 +62,16 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+// ROS includes
+#include <ros/ros.h>
 //-----------------------------------------------
 
-CANPeakSysUSB::CANPeakSysUSB(const char* cIniFile)
+CANPeakSysUSB::CANPeakSysUSB()//const char* cIniFile)
 {
 	m_bInitialized = false;
 
 	// read IniFile
-	m_IniFile.SetFileName(cIniFile, "CanPeakSysUSB.cpp");
+	//m_IniFile.SetFileName(cIniFile, "CanPeakSysUSB.cpp");
 
 	init();
 }
@@ -86,13 +88,44 @@ CANPeakSysUSB::~CANPeakSysUSB()
 //-----------------------------------------------
 void CANPeakSysUSB::init()
 {
+//OLD IniFile Stuff 
+//--------------------------------------------------------------------------------------------------
+/*
 	std::string sCanDevice; 
 	
 	if( m_IniFile.GetKeyString( "TypeCan", "DevicePath", &sCanDevice, false) != 0) {
 		sCanDevice = "/dev/pcan32";
 	} else std::cout << "CAN-device path read from ini-File: " << sCanDevice << std::endl;
-	
+*/	
+//--------------------------------------------------------------------------------------------------
 	//m_handle = LINUX_CAN_Open("/dev/pcan32", O_RDWR | O_NONBLOCK);
+
+	// create a handle for this node, ROS Parameter-Server
+	ros::NodeHandle n;
+	//Read Parameters from ROS Parameter-Server
+	std::string sCanDevice;
+	if (n.hasParam("TypeCan/DevicePath"))
+	{
+		n.getParam("TypeCan/DevicePath", sCanDevice);
+		ROS_INFO("TypeCan/DevicePath loaded from Parameter-Server is: %s", sCanDevice.c_str());
+	}
+	else
+	{
+		sCanDevice = "/dev/pcan32";
+		ROS_WARN("TypeCan/DevicePath not found on Parameter-Server, using default value: %s", sCanDevice.c_str());
+	}
+	
+	int iBaudrateVal = 0;
+	if (n.hasParam("CanCtrl/BaudrateVal"))
+	{
+		n.getParam("CanCtrl/BaudrateVal", iBaudrateVal);
+		ROS_INFO("CanCtrl/BaudrateVal loaded from Parameter-Server is: %i", iBaudrateVal);
+	}
+	else
+	{
+		iBaudrateVal = 0;
+		ROS_WARN("CanCtrl/BaudrateVal not found on Parameter-Server, using default value: 0");
+	}
 	m_handle = LINUX_CAN_Open(sCanDevice.c_str(), O_RDWR);
 
 	if (! m_handle)
@@ -102,10 +135,13 @@ void CANPeakSysUSB::init()
 		sleep(3);
 		exit(0);
 	}
-
+//OLD IniFile Stuff CanCtrl.ini
+//--------------------------------------------------------------------------------------------------
+/*
 	m_iBaudrateVal = 0;
 	m_IniFile.GetKeyInt( "CanCtrl", "BaudrateVal", &m_iBaudrateVal, true);
-	
+*/	
+//--------------------------------------------------------------------------------------------------	
 	initCAN();
 }
 

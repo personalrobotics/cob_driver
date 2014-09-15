@@ -84,13 +84,16 @@ private:
 	bool m_bObjectMode;
 	bool m_bIsTXError;
 	Mutex m_Mutex;
-
+//OLD IniFile Stuff 
+//--------------------------------------------------------------------------------------------------
+/*
 	IniFile m_IniFile;
-
+*/
+//--------------------------------------------------------------------------------------------------
 	void initIntern();
 
 public:
-	CanESD(const char* cIniFile, bool bObjectMode = false);
+	CanESD(bool bObjectMode = false);//const char* cIniFile, bool bObjectMode = false);
 	~CanESD();
 	void init(){};
 	bool transmitMsg(CanMsg CMsg, bool bBlocking = true);

@@ -59,18 +59,22 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+
+// ROS includes
+#include <ros/ros.h>
+
 //-----------------------------------------------
 
 const int CanPeakSys::c_iInterrupt = 7;
 const int CanPeakSys::c_iPort = 0x378;
 
 //-----------------------------------------------
-CanPeakSys::CanPeakSys(const char* cIniFile)
+CanPeakSys::CanPeakSys()//const char* cIniFile)
 {
 	m_bInitialized = false;
-
+	
 	// read IniFile
-	m_IniFile.SetFileName(cIniFile, "CanPeakSys.cpp");
+	//m_IniFile.SetFileName(cIniFile, "CanPeakSys.cpp");
 	init();
 }
 
@@ -86,10 +90,39 @@ CanPeakSys::~CanPeakSys()
 //-----------------------------------------------
 void CanPeakSys::init()
 {
- std::string sCanDevice; 
- if( m_IniFile.GetKeyString( "TypeCan", "DevicePath", &sCanDevice, false) != 0) {
+  
+ //if( m_IniFile.GetKeyString( "TypeCan", "DevicePath", &sCanDevice, false) != 0) {
+//		sCanDevice = "/dev/pcan32";
+//	} else std::cout << "CAN-device path read from ini-File: " << sCanDevice << std::endl;
+
+
+	// create a handle for this node, ROS Parameter-Server
+	ros::NodeHandle n;
+	//Read Parameters from ROS Parameter-Server
+	std::string sCanDevice;
+	if (n.hasParam("TypeCan/DevicePath"))
+	{
+		n.getParam("TypeCan/DevicePath", sCanDevice);
+		ROS_INFO("TypeCan/DevicePath loaded from Parameter-Server is: %s", sCanDevice.c_str());
+	}
+	else
+	{
 		sCanDevice = "/dev/pcan32";
-	} else std::cout << "CAN-device path read from ini-File: " << sCanDevice << std::endl;
+		ROS_WARN("TypeCan/DevicePath not found on Parameter-Server, using default value: %s", sCanDevice.c_str());
+	}
+	
+	int iBaudrateVal = 0;
+	if (n.hasParam("CanCtrl/BaudrateVal"))
+	{
+		n.getParam("CanCtrl/BaudrateVal", iBaudrateVal);
+		ROS_INFO("CanCtrl/BaudrateVal loaded from Parameter-Server is: %i", iBaudrateVal);
+	}
+	else
+	{
+		iBaudrateVal = 0;
+		ROS_WARN("CanCtrl/BaudrateVal not found on Parameter-Server, using default value: 0");
+	}
+	
 	m_handle = LINUX_CAN_Open(sCanDevice.c_str(), O_RDWR);
 	
 
@@ -103,8 +136,8 @@ void CanPeakSys::init()
 	
 	
 	int ret = CAN_ERR_OK;
-	int iBaudrateVal = 0;
-	m_IniFile.GetKeyInt( "CanCtrl", "BaudrateVal", &iBaudrateVal, true);
+	//int iBaudrateVal = 0;
+	//m_IniFile.GetKeyInt( "CanCtrl", "BaudrateVal", &iBaudrateVal, true);
 	
 	switch(iBaudrateVal)
 	{

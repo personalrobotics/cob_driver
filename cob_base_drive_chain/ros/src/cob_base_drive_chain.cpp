@@ -193,9 +193,12 @@ class NodeClass
 		// Constructor
 		NodeClass()
 		{
+
+//OLD IniFile Stuff
+//--------------------------------------------------------------------------------------------------
 			/// Parameters are set within the launch file
 			// Read number of drives from iniFile and pass IniDirectory to CobPlatfCtrl.
-			if (n.hasParam("IniDirectory"))
+			/*if (n.hasParam("IniDirectory"))
 			{
 				n.getParam("IniDirectory", sIniDirectory);
 				ROS_INFO("IniDirectory loaded from Parameter-Server is: %s", sIniDirectory.c_str());
@@ -205,17 +208,42 @@ class NodeClass
 				sIniDirectory = "Platform/IniFiles/";
 				ROS_WARN("IniDirectory not found on Parameter-Server, using default value: %s", sIniDirectory.c_str());
 			}
-
+			*/
+//--------------------------------------------------------------------------------------------------
 			n.param<bool>("PublishEffort", m_bPubEffort, false);
 			if(m_bPubEffort) ROS_INFO("You have choosen to publish effort of motors, that charges capacity of CAN");
 			
-			
-			IniFile iniFile;
-			iniFile.SetFileName(sIniDirectory + "Platform.ini", "PltfHardwareCoB3.h");
+			if (n.hasParam("NumberOfMotors"))
+			{
+				n.getParam("NumberOfMotors", m_iNumMotors);
+				ROS_INFO("NumberOfMotors loaded from Parameter-Server is: %i", m_iNumMotors);
+			}
+			else
+			{
+				m_iNumMotors = 8;
+				ROS_WARN("NumberOfMotors not found on Parameter-Server, using default value: 8");
+			}
 
-			// get max Joint-Velocities (in rad/s) for Steer- and Drive-Joint
-			iniFile.GetKeyInt("Config", "NumberOfMotors", &m_iNumMotors, true);
-			iniFile.GetKeyInt("Config", "NumberOfWheels", &m_iNumDrives, true);
+			if (n.hasParam("NumberOfWheels"))
+			{
+				n.getParam("NumberOfWheels", m_iNumDrives);
+				ROS_INFO("NumberOfWheels loaded from Parameter-Server is: %i", m_iNumDrives);
+			}
+			else
+			{
+				m_iNumDrives = 4;
+				ROS_WARN("NumberOfWheels not found on Parameter-Server, using default value: 4");
+			}
+
+//OLD IniFile Stuff
+//--------------------------------------------------------------------------------------------------
+//			IniFile iniFile;
+//			iniFile.SetFileName(sIniDirectory + "Platform.ini", "PltfHardwareCoB3.h");
+//
+//			// get max Joint-Velocities (in rad/s) for Steer- and Drive-Joint
+//			iniFile.GetKeyInt("Config", "NumberOfMotors", &m_iNumMotors, true);
+//			iniFile.GetKeyInt("Config", "NumberOfWheels", &m_iNumDrives, true);
+//--------------------------------------------------------------------------------------------------
 			if(m_iNumMotors < 2 || m_iNumMotors > 8) {
 				m_iNumMotors = 8;
 				m_iNumDrives = 4;
@@ -236,7 +264,8 @@ class NodeClass
 			m_gazeboPos.resize(m_iNumMotors);
 			m_gazeboVel.resize(m_iNumMotors);
 #else
-			m_CanCtrlPltf = new CanCtrlPltfCOb3(sIniDirectory);
+			m_CanCtrlPltf = new CanCtrlPltfCOb3();
+			//m_CanCtrlPltf = new CanCtrlPltfCOb3(sIniDirectory);
 #endif
 			
 			// implementation of topics
@@ -838,9 +867,35 @@ bool NodeClass::initDrives()
 
 	// init member vectors
 	m_Param.vdWheelNtrlPosRad.assign((m_iNumDrives),0);
-//	m_Param.vdWheelNtrlPosRad.assign(4,0);
+
+	//Read Parameter from ROS Parameterserver
+	if (n.hasParam("DrivePrms/MaxDriveRate"))
+	{
+		n.getParam("DrivePrms/MaxDriveRate", m_Param.dMaxDriveRateRadpS);
+		ROS_INFO("MaxDriveRate loaded from Parameter-Server is: %f", m_Param.dMaxDriveRateRadpS);
+	}
+	else
+	{
+		m_Param.dMaxDriveRateRadpS = 0.0;
+		ROS_WARN("MaxDriveRate not found on Parameter-Server, using default value: 0");
+	}
+
+	if (n.hasParam("DrivePrms/MaxSteerRate"))
+	{
+		n.getParam("DrivePrms/MaxSteerRate", m_Param.dMaxSteerRateRadpS);
+		ROS_INFO("MaxSteerRate loaded from Parameter-Server is: %f", m_Param.dMaxSteerRateRadpS);
+	}
+	else
+	{
+		m_Param.dMaxSteerRateRadpS = 0.0;
+		ROS_WARN("MaxSteerRate not found on Parameter-Server, using default value: 0");
+	}
+
+//OLD IniFile Stuff
+//--------------------------------------------------------------------------------------------------
 	// ToDo: replace the following steps by ROS configuration files
 	// create Inifile class and set target inifile (from which data shall be read)
+/*
 	IniFile iniFile;
 
 	//n.param<std::string>("PltfIniLoc", sIniFileName, "Platform/IniFiles/Platform.ini");
@@ -849,6 +904,8 @@ bool NodeClass::initDrives()
 	// get max Joint-Velocities (in rad/s) for Steer- and Drive-Joint
 	iniFile.GetKeyDouble("DrivePrms", "MaxDriveRate", &m_Param.dMaxDriveRateRadpS, true);
 	iniFile.GetKeyDouble("DrivePrms", "MaxSteerRate", &m_Param.dMaxSteerRateRadpS, true);
+*/
+//--------------------------------------------------------------------------------------------------
 
 #ifdef __SIM__
 	// get Offset from Zero-Position of Steering
@@ -862,6 +919,49 @@ bool NodeClass::initDrives()
 		m_Param.vdWheelNtrlPosRad[3] = 0.0f;
 #else
 	// get Offset from Zero-Position of Steering
+	if (n.hasParam("DrivePrms/Wheel1NeutralPosition"))
+	{
+		n.getParam("DrivePrms/Wheel1NeutralPosition", m_Param.vdWheelNtrlPosRad[0]);
+		ROS_INFO("Wheel1NeutralPosition loaded from Parameter-Server is: %f", m_Param.vdWheelNtrlPosRad[0]);
+	}
+	else
+	{
+		m_Param.vdWheelNtrlPosRad[0] = 0.0;
+		ROS_WARN("Wheel1NeutralPosition not found on Parameter-Server, using default value: 0");
+	}
+	if (n.hasParam("DrivePrms/Wheel2NeutralPosition"))
+	{
+		n.getParam("DrivePrms/Wheel2NeutralPosition", m_Param.vdWheelNtrlPosRad[1]);
+		ROS_INFO("Wheel2NeutralPosition loaded from Parameter-Server is: %f", m_Param.vdWheelNtrlPosRad[1]);
+	}
+	else
+	{
+		m_Param.vdWheelNtrlPosRad[1] = 0.0;
+		ROS_WARN("Wheel2NeutralPosition not found on Parameter-Server, using default value: 0");
+	}
+	if (n.hasParam("DrivePrms/Wheel3NeutralPosition"))
+	{
+		n.getParam("DrivePrms/Wheel3NeutralPosition", m_Param.vdWheelNtrlPosRad[2]);
+		ROS_INFO("Wheel3NeutralPosition loaded from Parameter-Server is: %f", m_Param.vdWheelNtrlPosRad[2]);
+	}
+	else
+	{
+		m_Param.vdWheelNtrlPosRad[2] = 0.0;
+		ROS_WARN("Wheel3NeutralPosition not found on Parameter-Server, using default value: 0");
+	}
+	if (n.hasParam("DrivePrms/Wheel4NeutralPosition"))
+	{
+		n.getParam("DrivePrms/Wheel4NeutralPosition", m_Param.vdWheelNtrlPosRad[3]);
+		ROS_INFO("Wheel4NeutralPosition loaded from Parameter-Server is: %f", m_Param.vdWheelNtrlPosRad[3]);
+	}
+	else
+	{
+		m_Param.vdWheelNtrlPosRad[3] = 0.0;
+		ROS_WARN("Wheel4NeutralPosition not found on Parameter-Server, using default value: 0");
+	}
+//OLD IniFile Stuff
+//--------------------------------------------------------------------------------------------------
+/*
 	if(m_iNumDrives >=1)
 		iniFile.GetKeyDouble("DrivePrms", "Wheel1NeutralPosition", &m_Param.vdWheelNtrlPosRad[0], true);
 	if(m_iNumDrives >=2)
@@ -870,7 +970,8 @@ bool NodeClass::initDrives()
 		iniFile.GetKeyDouble("DrivePrms", "Wheel3NeutralPosition", &m_Param.vdWheelNtrlPosRad[2], true);
 	if(m_iNumDrives >=4)
 		iniFile.GetKeyDouble("DrivePrms", "Wheel4NeutralPosition", &m_Param.vdWheelNtrlPosRad[3], true);
-
+*/
+//--------------------------------------------------------------------------------------------------
 	//Convert Degree-Value from ini-File into Radian:
 	for(int i=0; i<m_iNumDrives; i++)
 	{
@@ -880,15 +981,15 @@ bool NodeClass::initDrives()
 
 	// debug log
 	ROS_INFO("Initializing CanCtrlItf");
-	bool bTemp1;
+	bool b_initplft;
 #ifdef __SIM__
-	bTemp1 = true;
+	b_initplft = true;
 #else
-	bTemp1 =  m_CanCtrlPltf->initPltf();
+	b_initplft =  m_CanCtrlPltf->initPltf();
 #endif
 	// debug log
 	ROS_INFO("Initializing done");
 
 
-	return bTemp1;
+	return b_initplft;
 }

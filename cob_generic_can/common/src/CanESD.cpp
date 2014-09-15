@@ -58,13 +58,15 @@
 
 // Headers provided by other cob-packages which should be avoided/removed
 
+// ROS includes
+#include <ros/ros.h>
 
 //-----------------------------------------------
-CanESD::CanESD(const char* cIniFile, bool bObjectMode)
+CanESD::CanESD(bool bObjectMode)//const char* cIniFile, bool bObjectMode)
 {
 	m_bObjectMode = bObjectMode;
 	m_bIsTXError = false;
-	m_IniFile.SetFileName(cIniFile, "CanESD.cpp");
+	//m_IniFile.SetFileName(cIniFile, "CanESD.cpp");
 	initIntern();
 }
 
@@ -83,14 +85,45 @@ CanESD::~CanESD()
 //-----------------------------------------------
 void CanESD::initIntern()
 {	
+	
+	// create a handle for this node, ROS Parameter-Server
+	ros::NodeHandle n;
+	//Read Parameters from ROS Parameter-Server
+	int iCanNet = 1;
+	if (n.hasParam("CanCtrl/NetESD"))
+	{
+		n.getParam("CanCtrl/NetESD", iCanNet);
+		ROS_INFO("CanCtrl/NetESD loaded from Parameter-Server is: %i", iCanNet);
+	}
+	else
+	{
+		iCanNet = 1;
+		ROS_WARN("CanCtrl/DevicePath not found on Parameter-Server, using default value: %i", iCanNet);
+	}
+	
+	int iBaudrateVal = 0;
+	if (n.hasParam("CanCtrl/BaudrateVal"))
+	{
+		n.getParam("CanCtrl/BaudrateVal", iBaudrateVal);
+		ROS_INFO("CanCtrl/BaudrateVal loaded from Parameter-Server is: %i", iBaudrateVal);
+	}
+	else
+	{
+		iBaudrateVal = 0;
+		ROS_WARN("CanCtrl/BaudrateVal not found on Parameter-Server, using default value: 0");
+	}
 	int ret=0;	
 	ret = 0;
-	int iCanNet = 1;
-	m_IniFile.GetKeyInt( "CanCtrl", "NetESD", &iCanNet, true);
+//OLD IniFile Stuff CanCtrl.ini
+//--------------------------------------------------------------------------------------------------
+/*
+	//int iCanNet = 1;
+	//m_IniFile.GetKeyInt( "CanCtrl", "NetESD", &iCanNet, true);
 	
-	int iBaudrateVal = 2;
-	m_IniFile.GetKeyInt( "CanCtrl", "BaudrateVal", &iBaudrateVal, true);
-
+	//int iBaudrateVal = 2;
+	//m_IniFile.GetKeyInt( "CanCtrl", "BaudrateVal", &iBaudrateVal, true);
+*/
+//--------------------------------------------------------------------------------------------------
 	std::cout << "Initializing CAN network with id =" << iCanNet << ", baudrate=" << iBaudrateVal << std::endl;
 
 	int iRet;

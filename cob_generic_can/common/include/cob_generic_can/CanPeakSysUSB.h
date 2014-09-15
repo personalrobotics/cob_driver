@@ -63,7 +63,7 @@ class CANPeakSysUSB : public CanItf
 {
 public:
 	// --------------- Interface
-	CANPeakSysUSB(const char* cIniFile);
+	CANPeakSysUSB();//const char* cIniFile);
 	~CANPeakSysUSB();
 	void init();
 	void destroy() {};

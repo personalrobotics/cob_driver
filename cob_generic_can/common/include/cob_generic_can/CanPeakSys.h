@@ -64,7 +64,7 @@ class CanPeakSys : public CanItf
 {
 public:
 	// --------------- Interface
-	CanPeakSys(const char* cIniFile);
+	CanPeakSys();//const char* cIniFile);
 	~CanPeakSys();
 	void init();
 	void destroy() {}

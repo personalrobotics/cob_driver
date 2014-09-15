@@ -88,7 +88,7 @@ public:
 	/** 
 	 * Default constructor.
 	 */
-	CanCtrlPltfCOb3(std::string iniDirectory);
+	CanCtrlPltfCOb3();//std::string iniDirectory);
 
 	/**
 	 * Default destructor.
