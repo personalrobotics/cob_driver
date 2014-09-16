@@ -283,8 +283,8 @@ void UndercarriageCtrlGeom::InitUndercarriageCtrl(void)
 	// calculate compensation factor for velocity
 	for(int i = 0; i<4; i++)
 	{
-		m_UnderCarriagePrms.vdFactorVel[i] = - m_UnderCarriagePrms.vdSteerDriveCoupling[i]
-				     +(double(m_UnderCarriagePrms.iDistSteerAxisToDriveWheelMM) / double(m_UnderCarriagePrms.iRadiusWheelMM));
+		m_UnderCarriagePrms.vdFactorVel[i] = 1.0;/*- m_UnderCarriagePrms.vdSteerDriveCoupling[i]
+				     +(double(m_UnderCarriagePrms.iDistSteerAxisToDriveWheelMM) / double(m_UnderCarriagePrms.iRadiusWheelMM));*/
 	}
 
 }
