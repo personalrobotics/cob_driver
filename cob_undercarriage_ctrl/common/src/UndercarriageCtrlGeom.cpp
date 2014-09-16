@@ -268,7 +268,7 @@ void UndercarriageCtrlGeom::InitUndercarriageCtrl(void)
 		// also Init choosen Target angle
 		m_vdAngGearSteerTargetRad[i] = m_UnderCarriagePrms.WheelNeutralPos[i];
 
-		//JNN-Test
+		//Set inital rotation for each wheel 
 		m_vdAngGearSteerRad[i] = m_UnderCarriagePrms.WheelNeutralPos[i];
 	}
 	
