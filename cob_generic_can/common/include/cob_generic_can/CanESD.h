@@ -66,7 +66,6 @@
 #include <cob_generic_can/CanItf.h>
 
 // Headers provided by other cob-packages which should be avoided/removed
-#include <cob_utilities/IniFile.h>
 #include <cob_utilities/Mutex.h>
 
 
@@ -84,16 +83,10 @@ private:
 	bool m_bObjectMode;
 	bool m_bIsTXError;
 	Mutex m_Mutex;
-//OLD IniFile Stuff 
-//--------------------------------------------------------------------------------------------------
-/*
-	IniFile m_IniFile;
-*/
-//--------------------------------------------------------------------------------------------------
 	void initIntern();
 
 public:
-	CanESD(bool bObjectMode = false);//const char* cIniFile, bool bObjectMode = false);
+	CanESD(bool bObjectMode = false);
 	~CanESD();
 	void init(){};
 	bool transmitMsg(CanMsg CMsg, bool bBlocking = true);

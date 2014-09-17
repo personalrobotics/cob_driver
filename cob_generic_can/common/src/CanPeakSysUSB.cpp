@@ -18,7 +18,7 @@
  * Supervised by: Christian Connette, email:christian.connette@ipa.fhg.de
  *
  * Date of creation: Feb 2009
- * ToDo: Remove dependency to inifiles_old -> Inifile.h
+ * Done: Remove dependency to inifiles_old -> Inifile.h
  *
  * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  *
@@ -66,12 +66,11 @@
 #include <ros/ros.h>
 //-----------------------------------------------
 
-CANPeakSysUSB::CANPeakSysUSB()//const char* cIniFile)
+CANPeakSysUSB::CANPeakSysUSB()
 {
 	m_bInitialized = false;
 
-	// read IniFile
-	//m_IniFile.SetFileName(cIniFile, "CanPeakSysUSB.cpp");
+	
 
 	init();
 }
@@ -88,16 +87,7 @@ CANPeakSysUSB::~CANPeakSysUSB()
 //-----------------------------------------------
 void CANPeakSysUSB::init()
 {
-//OLD IniFile Stuff 
-//--------------------------------------------------------------------------------------------------
-/*
-	std::string sCanDevice; 
-	
-	if( m_IniFile.GetKeyString( "TypeCan", "DevicePath", &sCanDevice, false) != 0) {
-		sCanDevice = "/dev/pcan32";
-	} else std::cout << "CAN-device path read from ini-File: " << sCanDevice << std::endl;
-*/	
-//--------------------------------------------------------------------------------------------------
+
 	//m_handle = LINUX_CAN_Open("/dev/pcan32", O_RDWR | O_NONBLOCK);
 
 	// create a handle for this node, ROS Parameter-Server
@@ -135,13 +125,7 @@ void CANPeakSysUSB::init()
 		sleep(3);
 		exit(0);
 	}
-//OLD IniFile Stuff CanCtrl.ini
-//--------------------------------------------------------------------------------------------------
-/*
-	m_iBaudrateVal = 0;
-	m_IniFile.GetKeyInt( "CanCtrl", "BaudrateVal", &m_iBaudrateVal, true);
-*/	
-//--------------------------------------------------------------------------------------------------	
+
 	initCAN();
 }
 

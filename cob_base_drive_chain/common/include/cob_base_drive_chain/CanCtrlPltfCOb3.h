@@ -67,7 +67,6 @@
 #include <cob_generic_can/CanItf.h>
 
 // Headers provided by cob-packages which should be avoided/removed
-#include <cob_utilities/IniFile.h>
 #include <cob_utilities/Mutex.h>
 
 // remove (not supported)
@@ -88,7 +87,7 @@ public:
 	/** 
 	 * Default constructor.
 	 */
-	CanCtrlPltfCOb3();//std::string iniDirectory);
+	CanCtrlPltfCOb3();
 
 	/**
 	 * Default destructor.
@@ -254,7 +253,6 @@ protected:
 	 * Reads configuration of can node and components from Inifile
 	 * (should be adapted to use ROS-Parameter file)
 	 */
-	std::string sIniDirectory;
 	std::string sComposed;
 	void readConfiguration();
 
@@ -358,7 +356,7 @@ protected:
 
 	/**
 	 * CAN IDs for motor drive Harmonica.
-	 * (actually this should be read from inifile)
+	 * 
 	 */
 	struct CanOpenIDType
 	{	
@@ -442,7 +440,6 @@ protected:
 	//--------------------------------- Components
 	// Can-Interface
 	CanItf* m_pCanCtrl;
-	IniFile m_IniFile;
 
 	int m_iNumMotors;
 	int m_iNumDrives;

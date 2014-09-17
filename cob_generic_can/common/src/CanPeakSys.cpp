@@ -18,7 +18,7 @@
  * Supervised by: Christian Connette, email:christian.connette@ipa.fhg.de
  *
  * Date of creation: Feb 2009
- * ToDo: Remove dependency to inifiles_old -> Inifile.h
+ * Done: Remove dependency to inifiles_old -> Inifile.h
  *
  * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  *
@@ -69,12 +69,11 @@ const int CanPeakSys::c_iInterrupt = 7;
 const int CanPeakSys::c_iPort = 0x378;
 
 //-----------------------------------------------
-CanPeakSys::CanPeakSys()//const char* cIniFile)
+CanPeakSys::CanPeakSys()
 {
 	m_bInitialized = false;
 	
-	// read IniFile
-	//m_IniFile.SetFileName(cIniFile, "CanPeakSys.cpp");
+	
 	init();
 }
 
@@ -91,11 +90,6 @@ CanPeakSys::~CanPeakSys()
 void CanPeakSys::init()
 {
   
- //if( m_IniFile.GetKeyString( "TypeCan", "DevicePath", &sCanDevice, false) != 0) {
-//		sCanDevice = "/dev/pcan32";
-//	} else std::cout << "CAN-device path read from ini-File: " << sCanDevice << std::endl;
-
-
 	// create a handle for this node, ROS Parameter-Server
 	ros::NodeHandle n;
 	//Read Parameters from ROS Parameter-Server
@@ -136,8 +130,7 @@ void CanPeakSys::init()
 	
 	
 	int ret = CAN_ERR_OK;
-	//int iBaudrateVal = 0;
-	//m_IniFile.GetKeyInt( "CanCtrl", "BaudrateVal", &iBaudrateVal, true);
+	
 	
 	switch(iBaudrateVal)
 	{

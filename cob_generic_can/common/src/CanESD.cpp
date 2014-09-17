@@ -62,11 +62,10 @@
 #include <ros/ros.h>
 
 //-----------------------------------------------
-CanESD::CanESD(bool bObjectMode)//const char* cIniFile, bool bObjectMode)
+CanESD::CanESD(bool bObjectMode)
 {
 	m_bObjectMode = bObjectMode;
 	m_bIsTXError = false;
-	//m_IniFile.SetFileName(cIniFile, "CanESD.cpp");
 	initIntern();
 }
 
@@ -114,16 +113,6 @@ void CanESD::initIntern()
 	}
 	int ret=0;	
 	ret = 0;
-//OLD IniFile Stuff CanCtrl.ini
-//--------------------------------------------------------------------------------------------------
-/*
-	//int iCanNet = 1;
-	//m_IniFile.GetKeyInt( "CanCtrl", "NetESD", &iCanNet, true);
-	
-	//int iBaudrateVal = 2;
-	//m_IniFile.GetKeyInt( "CanCtrl", "BaudrateVal", &iBaudrateVal, true);
-*/
-//--------------------------------------------------------------------------------------------------
 	std::cout << "Initializing CAN network with id =" << iCanNet << ", baudrate=" << iBaudrateVal << std::endl;
 
 	int iRet;

@@ -18,7 +18,7 @@
  * Supervised by: Christian Connette, email:christian.connette@ipa.fhg.de
  *
  * Date of creation: Feb 2009
- * ToDo: Remove dependency to inifiles_old -> Inifile.h
+ * Done: Remove dependency to inifiles_old -> Inifile.h
  *
  * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  *
@@ -57,14 +57,14 @@
 //-----------------------------------------------
 #include <cob_generic_can/CanItf.h>
 #include <libpcan/libpcan.h>
-#include <cob_utilities/IniFile.h>
+
 //-----------------------------------------------
 
 class CanPeakSys : public CanItf
 {
 public:
 	// --------------- Interface
-	CanPeakSys();//const char* cIniFile);
+	CanPeakSys();
 	~CanPeakSys();
 	void init();
 	void destroy() {}
@@ -78,7 +78,6 @@ private:
 	HANDLE m_handle;
 	
 	bool m_bInitialized;
-	IniFile m_IniFile;
 	bool m_bSimuEnabled;
 
 	static const int c_iInterrupt;
