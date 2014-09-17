@@ -109,7 +109,7 @@ UndercarriageCtrlGeom::UndercarriageCtrlGeom()
 	
 	m_UnderCarriagePrms.WheelNeutralPos.assign(4,0);
 	m_UnderCarriagePrms.vdSteerDriveCoupling.assign(4,0);
-	m_UnderCarriagePrms.vdFactorVel.assign(4,0);
+	
 	
 	m_vdCtrlVal.assign( 4, std::vector<double> (2,0.0) );
 	
@@ -283,12 +283,7 @@ void UndercarriageCtrlGeom::InitUndercarriageCtrl(void)
 	// Calculate exact position of wheels in cart. and polar coords in robot coordinate frame
 	CalcExWheelPos();
 
-	// calculate compensation factor for velocity
-	for(int i = 0; i<4; i++)
-	{
-		m_UnderCarriagePrms.vdFactorVel[i] = 1.0;/*- m_UnderCarriagePrms.vdSteerDriveCoupling[i]
-				     +(double(m_UnderCarriagePrms.iDistSteerAxisToDriveWheelMM) / double(m_UnderCarriagePrms.iRadiusWheelMM));*/
-	}
+	
 
 }
 
@@ -350,51 +345,10 @@ void UndercarriageCtrlGeom::SetDesiredPltfVelocity(double dCmdVelLongMMS, double
 			m_vdAngGearSteerTargetRad[i] = m_vdAngGearSteerTarget2Rad[i];
 		}
 		
-		// provisorial --> skip interpolation and always take Target1
-		//m_vdVelGearDriveCmdRadS[i] = m_vdVelGearDriveTarget1RadS[i];
-		//m_vdAngGearSteerCmdRad[i] = m_vdAngGearSteerTarget1Rad[i];
-
-		/*// interpolate between last setpoint and theone of the new setpoint, which is closest to the current configuration
-		if (fabs(dtempDeltaPhi1RAD) <= fabs(dtempDeltaPhi2RAD))
-		{
-			// difference between new target orientation and last (interpolated) target orientation
-			dtempDeltaPhi1RAD = m_vdAngGearSteerTarget1Rad[i] - m_vdAngGearSteerIntpRad[i];
-			MathSup::normalizePi(dtempDeltaPhi1RAD);
-
-			// calculate interpolation step sizes, to reach target at end of the cycle
-			m_vdDeltaAngIntpRad[i] = dtempDeltaPhi1RAD;
-			m_vdDeltaDriveIntpRadS[i] = (m_vdVelGearDriveTarget1RadS[i] - m_vdVelGearDriveIntpRadS[i]);
-
-			// additionally calculate meen change in angular config for feedforward cmd
-			//m_vdVelGearSteerIntpRadS[i] = dtempDeltaPhi1RAD/m_UnderCarriagePrms.dCmdRateS;
-		}
-		else
-		{
-			// difference between new target orientation and last (interpolated) target orientation
-			dtempDeltaPhi2RAD = m_vdAngGearSteerTarget2Rad[i] - m_vdAngGearSteerIntpRad[i];
-			MathSup::normalizePi(dtempDeltaPhi2RAD);
-
-			// calculate interpolation step sizes, to reach target at end of the cycle
-			m_vdDeltaAngIntpRad[i] = dtempDeltaPhi2RAD;
-			m_vdDeltaDriveIntpRadS[i] = (m_vdVelGearDriveTarget2RadS[i] - m_vdVelGearDriveIntpRadS[i]);
-
-			// additionally calculate meen change in angular config for feedforward cmd
-			//m_vdVelGearSteerIntpRadS[i] = dtempDeltaPhi2RAD/m_UnderCarriagePrms.dCmdRateS;
-		}*/
+		
 	}
 
-	/*// Logging for debugging	
-	// get current time
-	m_RawTime.SetNow();
-	m_dNowTime = m_RawTime - m_StartTime;
-	// Log out Pltf-Velocities
-	fprintf(m_pfileDesVel, "%f %f %f %f \n", m_dNowTime, dCmdVelLongMMS, dCmdVelLatMMS, dCmdRotRobRadS);
-	fprintf(m_pfileMeasVel, "%f %f %f %f \n", m_dNowTime, m_dVelLongMMS, m_dVelLatMMS, m_dRotRobRadS);
-	// Log out corresponding Joint-Configuration
-	fprintf(m_pfileSteerAngTarget1, "%f %f %f %f %f \n", m_dNowTime, m_vdAngGearSteerTarget1Rad[0], m_vdAngGearSteerTarget1Rad[1], m_vdAngGearSteerTarget1Rad[2], m_vdAngGearSteerTarget1Rad[3]);
-	fprintf(m_pfileSteerAngTarget2, "%f %f %f %f %f \n", m_dNowTime, m_vdAngGearSteerTarget2Rad[0], m_vdAngGearSteerTarget2Rad[1], m_vdAngGearSteerTarget2Rad[2], m_vdAngGearSteerTarget2Rad[3]);
-	fprintf(m_pfileSteerAngTarget, "%f %f %f %f %f \n", m_dNowTime, m_vdAngGearSteerTargetRad[0], m_vdAngGearSteerTargetRad[1], m_vdAngGearSteerTargetRad[2], m_vdAngGearSteerTargetRad[3]);
-	fprintf(m_pfileDriveVelTarget, "%f %f %f %f %f \n", m_dNowTime, m_vdVelGearDriveTargetRadS[0], m_vdVelGearDriveTargetRadS[1], m_vdVelGearDriveTargetRadS[2], m_vdVelGearDriveTargetRadS[3]);*/
+	
 }
 
 // Set actual values of wheels (steer/drive velocity/position) (Istwerte)
@@ -544,7 +498,7 @@ void UndercarriageCtrlGeom::CalcDirect(void)
 	for(int i = 0; i<m_iNumberOfDrives; i++)
 	{
 		// calc effective Driving-Velocity
-		vdtempVelWheelMMS[i] = m_UnderCarriagePrms.iRadiusWheelMM * (m_vdVelGearDriveRadS[i]);// JNN - m_UnderCarriagePrms.vdFactorVel[i]* m_vdVelGearSteerRadS[i]);
+		vdtempVelWheelMMS[i] = m_UnderCarriagePrms.iRadiusWheelMM * (m_vdVelGearDriveRadS[i]);
 	}
 
 	// calculate rotational rate of robot and current "virtual" axis between all wheels
@@ -703,13 +657,6 @@ void UndercarriageCtrlGeom::CalcControlStep(void)
 		}
 	}
 	
-	//JNN
-	/*
-	// Correct Driving-Wheel-Velocity, because of coupling and axis-offset
-	for (int i = 0; i<4; i++)
-	{
-		m_vdVelGearDriveCmdRadS[i] += m_vdVelGearSteerCmdRadS[i] * m_UnderCarriagePrms.vdFactorVel[i];
-	}*/
 
 }
 
