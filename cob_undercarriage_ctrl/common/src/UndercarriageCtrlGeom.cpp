@@ -544,7 +544,7 @@ void UndercarriageCtrlGeom::CalcDirect(void)
 	for(int i = 0; i<m_iNumberOfDrives; i++)
 	{
 		// calc effective Driving-Velocity
-		vdtempVelWheelMMS[i] = m_UnderCarriagePrms.iRadiusWheelMM * (m_vdVelGearDriveRadS[i] - m_UnderCarriagePrms.vdFactorVel[i]* m_vdVelGearSteerRadS[i]);
+		vdtempVelWheelMMS[i] = m_UnderCarriagePrms.iRadiusWheelMM * (m_vdVelGearDriveRadS[i]);// JNN - m_UnderCarriagePrms.vdFactorVel[i]* m_vdVelGearSteerRadS[i]);
 	}
 
 	// calculate rotational rate of robot and current "virtual" axis between all wheels
@@ -703,11 +703,13 @@ void UndercarriageCtrlGeom::CalcControlStep(void)
 		}
 	}
 	
+	//JNN
+	/*
 	// Correct Driving-Wheel-Velocity, because of coupling and axis-offset
 	for (int i = 0; i<4; i++)
 	{
 		m_vdVelGearDriveCmdRadS[i] += m_vdVelGearSteerCmdRadS[i] * m_UnderCarriagePrms.vdFactorVel[i];
-	}
+	}*/
 
 }
 
