@@ -117,7 +117,7 @@ void CANPeakSysUSB::init()
 		ROS_WARN("CanCtrl/BaudrateVal not found on Parameter-Server, using default value: 0");
 	}
 	m_handle = LINUX_CAN_Open(sCanDevice.c_str(), O_RDWR);
-
+	
 	if (! m_handle)
 	{
 		// Fatal error
@@ -125,7 +125,7 @@ void CANPeakSysUSB::init()
 		sleep(3);
 		exit(0);
 	}
-
+	m_iBaudrateVal = iBaudrateVal;
 	initCAN();
 }
 
@@ -270,7 +270,8 @@ bool CANPeakSysUSB::receiveMsgRetry(CanMsg* pCMsg, int iNrOfRetry)
 bool CANPeakSysUSB::initCAN() {
 	int ret = CAN_ERR_OK;
 	bool bRet = true;
-
+	std::cout << "Baudrate: ";
+	std::cout << m_iBaudrateVal << std::endl;
 	switch(m_iBaudrateVal)
 	{
 	case 0:
