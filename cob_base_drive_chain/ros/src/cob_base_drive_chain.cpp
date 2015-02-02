@@ -68,6 +68,8 @@
 #include <control_msgs/JointTrajectoryControllerState.h>
 #include <control_msgs/JointControllerState.h>
 
+#include <neo_msgs/EmergencyStopState.h>
+
 // ROS service includes
 #include <cob_srvs/Trigger.h>
 #include <cob_base_drive_chain/ElmoRecorderReadout.h>
@@ -110,6 +112,11 @@ class NodeClass
 		* The node subscribes to the topic "JointStateCmd" and performs the requested motor commands
 		*/
 		ros::Subscriber topicSub_JointStateCmd;
+
+		/**
+		* The node subscribes to the topic "emergency_stop_state" 
+		*/
+		ros::Subscriber topicSub_EMStopState;
 
 		// service servers
 		/**
@@ -189,6 +196,9 @@ class NodeClass
 		bool m_bPubEffort;
 		bool m_bReadoutElmo;
 
+		bool EMStopActive = false;
+		bool ScannerStopActive = false;
+
 		// Constructor
 		NodeClass()
 		{
@@ -252,6 +262,8 @@ class NodeClass
 			// subscribed topics
 			topicSub_JointStateCmd = n.subscribe("joint_command", 1, &NodeClass::topicCallback_JointStateCmd, this);
 
+			topicSub_EMStopState = n.subscribe("emergency_stop_state", 1, &NodeClass::topicCallback_EMStopState, this);
+
 			// implementation of service servers
 			srvServer_Init = n.advertiseService("init", &NodeClass::srvCallback_Init, this);
 			srvServer_ElmoRecorderConfig = n.advertiseService("ElmoRecorderConfig", &NodeClass::srvCallback_ElmoRecorderConfig, this);
@@ -281,6 +293,13 @@ class NodeClass
 		}
 
 		// topic callback functions 
+		//topic will be called when a new message arrives on a topic
+		void topicCallback_EMStopState(const neo_msgs::EmergencyStopState::ConstPtr& msg)
+		{
+			EMStopActive = msg->emergency_button_stop;
+			ScannerStopActive = msg->scanner_stop;
+			
+		}
 		// function will be called when a new message arrives on a topic
 		void topicCallback_JointStateCmd(const control_msgs::JointTrajectoryControllerState::ConstPtr& msg)
 		{
@@ -436,6 +455,16 @@ class NodeClass
 			ROS_DEBUG("Service Callback init");
 			if(m_bisInitialized == false)
 			{
+				//JNN
+				if(EMStopActive == true || ScannerStopActive == true)
+				{
+					ROS_WARN("Waiting for EMStop or ScannerStop!");	
+				}
+				while(EMStopActive == true || ScannerStopActive == true)
+				{
+					//wait until EMStop and Scannerstop are false
+					ros::spinOnce();					
+				}
 				m_bisInitialized = initDrives();
 				//ROS_INFO("...initializing can-nodes...");
 				//m_bisInitialized = m_CanCtrlPltf->initPltf();
