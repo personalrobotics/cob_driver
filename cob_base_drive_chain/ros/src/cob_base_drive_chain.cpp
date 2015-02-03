@@ -196,12 +196,15 @@ class NodeClass
 		bool m_bPubEffort;
 		bool m_bReadoutElmo;
 
-		bool EMStopActive = false;
-		bool ScannerStopActive = false;
+		bool EMStopActive;
+		bool ScannerStopActive;
 
 		// Constructor
 		NodeClass()
 		{
+
+			EMStopActive = false;
+			ScannerStopActive = false;
 
 			n.param<bool>("PublishEffort", m_bPubEffort, false);
 			if(m_bPubEffort) ROS_INFO("You have choosen to publish effort of motors, that charges capacity of CAN");
